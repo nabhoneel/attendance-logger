@@ -1,0 +1,44 @@
+.Attendance {
+  display: flex;
+  flex-direction: column;
+  margin: 20px 0 0 0;
+}
+
+.list-element {
+  text-align: left;
+  box-sizing: border-box;
+  flex-grow: 1;
+  width: 100%;
+  padding: 0.8em 0.8em;
+  overflow: hidden;
+  display: flex;
+  border: solid 3px white;
+  border-radius: 10px; 
+}
+
+.table-cell-heading {
+  @media screen and (max-width: 480px) {    
+    padding: 0.8em 0.2em;
+    font-size: 0.9em;
+  }
+}
+
+.list-element > div {
+  width: 80%;
+}
+
+.list-element > i {
+  width: 20%;
+}
+
+.undecided-element.list-element {
+  background: #FFF9C4;
+}
+
+.notGoing-element.list-element {
+  background: #FF7043;
+}
+
+.going-element.list-element {
+  background: lightgreen;
+}

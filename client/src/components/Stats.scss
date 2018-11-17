@@ -1,0 +1,23 @@
+.Stats {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 20px 0 0 0;
+  // padding: 0;
+}
+
+.table-cell {
+  text-align: center;
+  box-sizing: border-box;
+  flex-grow: 1;
+  width: 100%;  // Default to full width
+  padding: 0.8em 0.8em;
+  overflow: hidden; // Or flex might break
+  width: 33.33%;
+  border: solid 3px white;
+  background: #f3e5f5;
+}
+
+.table-cell-heading {
+  font-size: 1.1em;
+  font-weight: 700;
+}

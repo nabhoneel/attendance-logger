@@ -1,0 +1,33 @@
+.reason-editor {
+  position: relative;
+  padding-top: 10px;
+  height: 3em;
+}
+
+.input-effect {
+  font-family: 'Google Sans', sans-serif;
+  font-size: 0.7em;
+  border: none; 
+  padding: 7px 0; 
+  border-bottom: 1px solid #ccc;
+
+  &:focus {
+    outline-color: #00000000 !important;
+  }
+
+  &:focus ~ .focus-border{
+    width: 100%; 
+    transition: 0.4s; 
+    left: 0;
+  }
+}
+
+.focus-border {
+  position: absolute; 
+  bottom: 0; 
+  left: 0; 
+  width: 0; 
+  height: 2px; 
+  background-color: #4caf50; 
+  transition: 0.4s;  
+}

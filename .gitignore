@@ -1,0 +1,10 @@
+/node_modules
+/openode-upload
+
+/client/build
+/client/node_modules
+
+Dockerfile
+
+.openode
+.env

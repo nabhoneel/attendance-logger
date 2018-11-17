@@ -1,0 +1,76 @@
+@mixin set-top-border-radius($border-radius) {
+  border-top-left-radius: $border-radius;
+  border-top-right-radius: $border-radius;
+}
+
+$text-shadow-color: grey;
+
+.Navbar {
+  border-radius: inherit;
+}
+
+.main-navbar {
+  background: #B39DDB;
+  // background: #ffc23b;
+  @include set-top-border-radius(inherit);
+  padding: 1em;
+  display: flex;
+  justify-content: space-between;
+}
+
+.logo {
+
+  font-size: 2.3em;
+  font-weight: 800;
+  margin: 10px;
+  color: white;
+
+  @media screen and (max-width: 480px) {
+    font-size: 2em;
+    font-weight: 700;
+    margin: 5px;
+  }
+}
+
+.btn {
+  border: none;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: none;
+  cursor: pointer;
+  padding: 16px 35px;
+  @media screen and (max-width: 480px) {
+    padding: 8px 14px;
+  }
+  display: inline-block;
+  margin: 5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-decoration: none;
+  font-weight: 700;
+  outline: none;
+  position: relative;
+  -webkit-transition: all 0.3s;
+  transition: all 0.3s;
+}
+
+.btn-primary {
+  background: #cb4e4e;
+  color: #fff;
+  box-shadow: 0 6px #ab3c3c;
+  -webkit-transition: none;
+  -moz-transition: none;
+  transition: none;
+  border-radius: 1em;
+
+  &:hover {
+    box-shadow: 0 4px #ab3c3c;
+    top: 2px;
+  }
+
+  &:active {
+    box-shadow: 0 0 #ab3c3c;
+    top: 6px;
+  }
+}
