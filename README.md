@@ -25,4 +25,5 @@ $ npm install
 ![not signed in (cannot say yes/no, cannot set a new reason for going/not going)](https://github.com/nabhoneel/attendance-logger/raw/master/screencapture-attendance-openode-io-2018-11-17-15_09_55.png)
 
 ![signed in](https://github.com/nabhoneel/attendance-logger/raw/master/screencapture-attendance-openode-io-2018-11-17-15_14_49.png)
+
 Deployed at [attendance.openode.io](http://attendance.openode.io) 
