@@ -8,3 +8,4 @@ Dockerfile
 
 .openode
 .env
+app.log

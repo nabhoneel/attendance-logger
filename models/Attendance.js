@@ -6,6 +6,8 @@ const User = require('./User');
 const ReasonSchema = require('./Reason');
 const LogUserSchema = require('./LogUser');
 
+const logger = require('../config/winston');
+
 const attendanceSchema = new Schema({
   date: { type: String, default: Date.date },
   reason: [ ReasonSchema ],
@@ -29,8 +31,7 @@ module.exports.getLog = async (res) => {
     allUsers = userRes.map((user) => {
 			User.markUndecided(user.googleID); // initially increment 'undecided' count of all users
 			return ({googleID: user.googleID, name: user.name});        
-    });
-    console.log(allUsers);
+    });    
     
     const [ going, notGoing, undecided ] = [ [], [], allUsers ];
 
@@ -51,7 +52,7 @@ module.exports.getLog = async (res) => {
       undecided: undecided
     });
   } else {
-    const [ going, notGoing, undecided ] = [ result.going, result.notGoing, result.undecided ];
+    const [ going, notGoing, undecided ] = [ result.going, result.notGoing, result.undecided ];    
   
     res.send({
       totalGoing: going.length,
@@ -64,11 +65,15 @@ module.exports.getLog = async (res) => {
   }
 }
 
+sendLogStatusResponse = (finalRes) => {
+  if(finalRes != null) finalRes.send({status: 'success'});
+}
+
 module.exports.updateDailyLog = async (googleID, finalRes) => {
   // find the attendance log for current date:
 	const result = await Attendance.findOne( { date: Date.date });
   
-  if(result && googleID == null) finalRes.send({status: 'success'});
+  if(result && googleID == null) sendLogStatusResponse(finalRes);
 
   if(!result) {
 		// if today's attendance log does not exist
@@ -80,7 +85,7 @@ module.exports.updateDailyLog = async (googleID, finalRes) => {
 			User.markUndecided(user.googleID); // initially increment 'undecided' count of all users
 			return ({googleID: user.googleID, name: user.name});        
     });
-    console.log(allUsers);
+    console.log(allUsers);    
 		
 		// now, create today's attendance log:
 		await new Attendance({
@@ -91,7 +96,7 @@ module.exports.updateDailyLog = async (googleID, finalRes) => {
 			undecided: allUsers
 		}).save();
 		
-		finalRes.send({status: 'success'});
+		sendLogStatusResponse(finalRes);
   } else if(googleID != null){ 
 		// if a new user is being added today, to an existing attendance log:
     console.log('Adding user to attendance log');
@@ -105,7 +110,7 @@ module.exports.updateDailyLog = async (googleID, finalRes) => {
 		);
 		
 		if(err) console.log('Error: \n' + err);
-		else finalRes.send({status: 'success'});
+		else sendLogStatusResponse(finalRes);
   }
 }
 
@@ -116,10 +121,8 @@ module.exports.setReason = async (googleID, text, res) => {
   );
   let reasons = reasonDoc.reason.map(reason => ({text: reason.text, setBy: reason.setBy, name: reason.name}));
   
-  console.log('passed text: ' + text);
+  logger.info('passed text: ' + text);
   if(text.length < 1) {
-    // console.log('empty text...');
-    console.log(reasons);
     res.send({
       reason: reasons[reasons.length - 1].text,
       setBy: reasons[reasons.length - 1].name.split(' ')[0],
@@ -175,6 +178,8 @@ const sendAttendanceResponse = res => {
     console.log(notGoing);
     console.log(undecided);
 
+    logger.info({going: going, notGoing: notGoing, undecided: undecided});
+    
     res.send({
       totalGoing: going.length,
       totalNotGoing: notGoing.length,
@@ -193,7 +198,7 @@ module.exports.markGoing = (googleID, res) => {
       result.going.map(user => user.googleID).indexOf(googleID), 
       result.undecided.map(user => user.googleID).indexOf(googleID), 
       result.notGoing.map(user => user.googleID).indexOf(googleID)
-    ];    
+    ];
 
     if(goingCheck != -1) {
       sendAttendanceResponse(res);
@@ -210,6 +215,12 @@ module.exports.markGoing = (googleID, res) => {
       // increment user's 'going' count by 1
       User.markGoing(googleID);
       
+      // logger.info({
+      //   type: 'markGoing',
+      //   googleID: googleID, 
+      //   name: result.notGoing[notGoingCheck].name
+      // });
+      
       // 'notGoing' list
       await Attendance.findOneAndUpdate(
         { date: Date.date },
@@ -225,6 +236,12 @@ module.exports.markGoing = (googleID, res) => {
       );
       // increment user's 'going' count by 1
       User.markGoing(googleID);
+
+      // logger.info({
+      //   type: 'markGoing',
+      //   googleID: googleID, 
+      //   name: result.undecided[undecided].name
+      // });
       
       // 'undecided' list
       await Attendance.findOneAndUpdate(
@@ -261,6 +278,12 @@ module.exports.markNotGoing = (googleID, res) => {
       );
       User.markNotGoing(googleID); // increment User's 'not going' count by 1
 
+      // logger.info({
+      //   type: 'markNotGoing',
+      //   googleID: googleID, 
+      //   name: result.going[goingCheck].name
+      // });
+
       // 'going' list:
       await Attendance.findOneAndUpdate(
         { date: Date.date },
@@ -276,6 +299,12 @@ module.exports.markNotGoing = (googleID, res) => {
         { $push: { notGoing: { googleID: googleID, name: result.undecided[undecidedCheck].name } }}
       );
       User.markNotGoing(googleID); // increment User's 'not going' count by 1
+
+      // logger.info({
+      //   type: 'markNotGoing',
+      //   googleID: googleID, 
+      //   name: result.undecided[undecided].name
+      // });
       
       // 'undecided' list:
       await Attendance.findOneAndUpdate(

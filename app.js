@@ -4,8 +4,8 @@ const mongoose = require('mongoose');
 const passport = require('passport');
 const cookieSession = require('cookie-session');
 const bodyParser = require('body-parser');
-const winston = require('winston');
-const expressWinston = require('express-winston');
+const winston = require('./config/winston');
+const morgan = require('morgan');
 
 // le valuable environment variables:
 require('dotenv').config();
@@ -17,20 +17,8 @@ require('./passport'); // passport service file (must be present after User.js, 
 
 const app = express();
 
-// winston to the rescue:
-app.use(expressWinston.logger({
-  transports: [
-    new winston.transports.Console({
-      json: true,
-      colorize: true
-    })
-  ],
-  meta: true, // optional: control whether you want to log the meta data about the request (default to true)
-  msg: "HTTP {{req.method}} {{req.url}}", // optional: customize the default logging message. E.g. "{{res.statusCode}} {{req.method}} {{res.responseTime}}ms {{req.url}}"
-  expressFormat: true, // Use the default Express/morgan request formatting. Enabling this will override any msg if true. Will only output colors with colorize set to true
-  colorize: false, // Color the text and status code, using the Express/morgan color palette (text: gray, status: default green, 3XX cyan, 4XX yellow, 5XX red).
-  ignoreRoute: function (req, res) { return false; } // optional: allows to skip some log messages based on request and/or response
-}));
+// log to file:
+// app.use(morgan('combined', { stream: winston.stream }));
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -48,7 +36,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-require('./allRoutes')(app); // set up Passport
+require('./allRoutes')(app); // set up Passport and routes
 
 mongoose.connect(keys.mongoURI, { useNewUrlParser: true }).catch(err => console.log(err)); // set up MongoDB via Mongoose
 
