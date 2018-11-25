@@ -4,6 +4,8 @@
 /client/build
 /client/node_modules
 
+/cloud-node
+
 Dockerfile
 
 .openode

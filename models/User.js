@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
+const logger = require('../config/winston');
 
 const userSchema = new Schema({
   googleID: String,
@@ -19,6 +20,7 @@ module.exports.signIn = async (profile, done) => {
   
   if(existingUser) {
     require('./Attendance').updateDailyLog(null, null);
+    logger.info({existingUser: existingUser});
     return done(null, existingUser);
   } else {
     const newUser = await new User({
@@ -31,6 +33,15 @@ module.exports.signIn = async (profile, done) => {
     }).save();
 
     require('./Attendance').updateDailyLog(profile.id, null);
+    logger.info({newUser: {
+      googleID: profile.id,
+      email: profile.emails[0].value,
+      name: profile.displayName,
+      going: 0,
+      notGoing: 0,
+      undecided: 0
+    }});
+    
     done(null, newUser);
   }
 }

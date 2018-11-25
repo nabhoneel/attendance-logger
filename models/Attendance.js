@@ -9,7 +9,7 @@ const LogUserSchema = require('./LogUser');
 const logger = require('../config/winston');
 
 const attendanceSchema = new Schema({
-  date: { type: String, default: Date.date },
+  date: { type: String, default: Date.getDate() },
   reason: [ ReasonSchema ],
   going: [ LogUserSchema ],
   notGoing: [ LogUserSchema ],
@@ -21,7 +21,7 @@ module.exports = Attendance;
 
 module.exports.getLog = async (res) => {
   // get today's attendance log
-  const result = await Attendance.findOne({ date: Date.date });
+  const result = await Attendance.findOne({ date: Date.getDate() });
   
   if(!result) {
     // get googleID and names of all users:
@@ -36,7 +36,7 @@ module.exports.getLog = async (res) => {
     const [ going, notGoing, undecided ] = [ [], [], allUsers ];
 
     await new Attendance({
-			date: Date.date,
+			date: Date.getDate(),
 			reason: [{text: 'still to be set...', setBy: '', name: 'le admin'}],
 			going: [],
 			notGoing: [],
@@ -70,16 +70,21 @@ sendLogStatusResponse = (finalRes) => {
 }
 
 module.exports.updateDailyLog = async (googleID, finalRes) => {
+  logger.info({called: 'updateDailyLog'});
   // find the attendance log for current date:
-	const result = await Attendance.findOne( { date: Date.date });
+	const result = await Attendance.findOne( { date: Date.getDate() });
   
+  logger.info(Date.getFullDate());
+  logger.info(Date.getDate());
+  logger.info(result);
+  logger.info(googleID);
   if(result && googleID == null) sendLogStatusResponse(finalRes);
 
   if(!result) {
 		// if today's attendance log does not exist
     // get googleID of all users:
 		const userRes = await User.find({}, 'googleID name');
-		console.log('creating attendance');
+		logger.info({attendanceState: 'creating today\'s attendance'});
     // insert each googleID as a String into the allUsers array:
     let allUsers = userRes.map((user) => {
 			User.markUndecided(user.googleID); // initially increment 'undecided' count of all users
@@ -89,7 +94,7 @@ module.exports.updateDailyLog = async (googleID, finalRes) => {
 		
 		// now, create today's attendance log:
 		await new Attendance({
-			date: Date.date,
+			date: Date.getDate(),
 			reason: [{text: 'still to be set...', setBy: '', name: 'le admin'}],
 			going: [],
 			notGoing: [],
@@ -105,7 +110,7 @@ module.exports.updateDailyLog = async (googleID, finalRes) => {
 		userName = name.name;
 
 		const { err, _ } = await Attendance.findOneAndUpdate(
-			{ date: Date.date }, 
+			{ date: Date.getDate() }, 
 			{ $push: { undecided: {googleID: googleID, name: userName }}},
 		);
 		
@@ -116,7 +121,7 @@ module.exports.updateDailyLog = async (googleID, finalRes) => {
 
 module.exports.setReason = async (googleID, text, res) => { 
   const reasonDoc = await Attendance.findOne(
-    { date: Date.date },
+    { date: Date.getDate() },
     'reason'
   );
   let reasons = reasonDoc.reason.map(reason => ({text: reason.text, setBy: reason.setBy, name: reason.name}));
@@ -133,7 +138,7 @@ module.exports.setReason = async (googleID, text, res) => {
 		let username = name.name;
 
     await Attendance.findOneAndUpdate(
-      { date: Date.date },
+      { date: Date.getDate() },
 			{ $push: { reason: { text: text, setBy: googleID, name: username }}}
 		);
 
@@ -147,7 +152,7 @@ module.exports.setReason = async (googleID, text, res) => {
 
 module.exports.getReason = async (res) => {
   const reasonDoc = await Attendance.findOne(
-    { date: Date.date },
+    { date: Date.getDate() },
     'reason'
   );
 
@@ -170,7 +175,7 @@ module.exports.getReason = async (res) => {
 const sendAttendanceResponse = res => {
   // send response back containing updated Attendance list:
   
-  Attendance.findOne({ date: Date.date }, (_, result) => {
+  Attendance.findOne({ date: Date.getDate() }, (_, result) => {
     const [ going, notGoing, undecided ] = [ result.going, result.notGoing, result.undecided ];
 
     console.log('current state to be sent off: ');
@@ -193,7 +198,7 @@ const sendAttendanceResponse = res => {
   
 module.exports.markGoing = (googleID, res) => {
   // to mark the current user as 'going'
-  Attendance.findOne( { date: Date.date }, 'undecided notGoing going', async (err, result) => {  
+  Attendance.findOne( { date: Date.getDate() }, 'undecided notGoing going', async (err, result) => {  
     const [ goingCheck, undecidedCheck, notGoingCheck ] = [ 
       result.going.map(user => user.googleID).indexOf(googleID), 
       result.undecided.map(user => user.googleID).indexOf(googleID), 
@@ -209,7 +214,7 @@ module.exports.markGoing = (googleID, res) => {
     if(notGoingCheck != -1) {
       // step 1: add user to 'going' list under today's attendance:
       await Attendance.findOneAndUpdate(
-        { date: Date.date }, 
+        { date: Date.getDate() }, 
         { $push: { going: {googleID: googleID, name: result.notGoing[notGoingCheck].name }}}
       );
       // increment user's 'going' count by 1
@@ -223,7 +228,7 @@ module.exports.markGoing = (googleID, res) => {
       
       // 'notGoing' list
       await Attendance.findOneAndUpdate(
-        { date: Date.date },
+        { date: Date.getDate() },
         { $pull: { notGoing: { googleID: googleID }}}
       );
 
@@ -231,7 +236,7 @@ module.exports.markGoing = (googleID, res) => {
       sendAttendanceResponse(res);
     } else if(undecidedCheck != -1) {        
       await Attendance.findOneAndUpdate(
-        { date: Date.date }, 
+        { date: Date.getDate() }, 
         { $push: { going: {googleID: googleID, name: result.undecided[undecidedCheck].name }}}
       );
       // increment user's 'going' count by 1
@@ -245,7 +250,7 @@ module.exports.markGoing = (googleID, res) => {
       
       // 'undecided' list
       await Attendance.findOneAndUpdate(
-        { date: Date.date },
+        { date: Date.getDate() },
         { $pull: { undecided: { googleID: googleID }}}
       );
 
@@ -257,7 +262,7 @@ module.exports.markGoing = (googleID, res) => {
 
 module.exports.markNotGoing = (googleID, res) => {
   // to mark the user as 'not going':
-  Attendance.findOne( { date: Date.date }, 'undecided going notGoing', async (err, result) => {
+  Attendance.findOne( { date: Date.getDate() }, 'undecided going notGoing', async (err, result) => {
     const [ goingCheck, undecidedCheck, notGoingCheck ] = [ 
       result.going.map(user => user.googleID).indexOf(googleID), 
       result.undecided.map(user => user.googleID).indexOf(googleID), 
@@ -273,7 +278,7 @@ module.exports.markNotGoing = (googleID, res) => {
     if(goingCheck != -1) {
       // step 1: add user to 'going' list under today's attendance:
       await Attendance.findOneAndUpdate(
-        { date: Date.date }, 
+        { date: Date.getDate() }, 
         { $push: { notGoing: { googleID: googleID, name: result.going[goingCheck].name } }}
       );
       User.markNotGoing(googleID); // increment User's 'not going' count by 1
@@ -286,7 +291,7 @@ module.exports.markNotGoing = (googleID, res) => {
 
       // 'going' list:
       await Attendance.findOneAndUpdate(
-        { date: Date.date },
+        { date: Date.getDate() },
         { $pull: { going: { googleID: googleID }}}
       );
 
@@ -295,7 +300,7 @@ module.exports.markNotGoing = (googleID, res) => {
       
     } else if(undecidedCheck != -1) {
       await Attendance.findOneAndUpdate(
-        { date: Date.date }, 
+        { date: Date.getDate() }, 
         { $push: { notGoing: { googleID: googleID, name: result.undecided[undecidedCheck].name } }}
       );
       User.markNotGoing(googleID); // increment User's 'not going' count by 1
@@ -308,7 +313,7 @@ module.exports.markNotGoing = (googleID, res) => {
       
       // 'undecided' list:
       await Attendance.findOneAndUpdate(
-        { date: Date.date },
+        { date: Date.getDate() },
         { $pull: { undecided: { googleID: googleID }}}
       );
 

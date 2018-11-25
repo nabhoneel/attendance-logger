@@ -18,7 +18,7 @@ require('./passport'); // passport service file (must be present after User.js, 
 const app = express();
 
 // log to file:
-// app.use(morgan('combined', { stream: winston.stream }));
+app.use(morgan('combined', { stream: winston.stream }));
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))

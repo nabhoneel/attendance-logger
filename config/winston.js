@@ -5,14 +5,12 @@ const winston = require('winston');
 const options = {
   file: {
     level: 'info',
-    filename: 'app.log',
+    filename: 'app_1.log',
     handleExceptions: true,
     json: true,
     maxsize: 5242880, // 5MB
-    maxFiles: 10,
-    colorize: true,
-    prettyPrint: true,
-    timestamp: true
+    maxFiles: 5,
+    colorize: false
   },
   console: {
     level: 'debug',

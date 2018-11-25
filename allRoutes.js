@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const requireLogin = require('./config/requireLogin');
 const attendance = require('./models/Attendance');
 
-const Attendance = mongoose.model('attendance');
+const logger = require('./config/winston');
 
 module.exports = (app) => {
   app.get('/auth/google/', passport.authenticate('google', {
@@ -30,6 +30,7 @@ module.exports = (app) => {
   });
 
   app.post('/api/create_current_log', (req, res) => {
+    logger.info({calling: 'updateDailyLog'});
     attendance.updateDailyLog(null, res);
   });
 
