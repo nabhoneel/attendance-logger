@@ -5,7 +5,7 @@ Super simple webapp to allow people to sign in and **let them say whether they'l
 ## Stuff used
 
  - React (+Redux, for maintaining state) on the front
- - Node server (hosted on [Openode.io](https://www.openode.io/))
+ - Node server (hosted on [Cloudno.de](https://cloudno.de/))
  - MongoDB (hosted on [mlab.com](https://www.mlab.com))
  - Oh, and sign in with Google OAuth2
 
@@ -26,4 +26,4 @@ $ npm install
 
 ![signed in](https://github.com/nabhoneel/attendance-logger/raw/master/screencapture-attendance-openode-io-2018-11-17-15_14_49.png)
 
-Deployed at [attendance.openode.io](http://attendance.openode.io) 
+Deployed at [attendance.cloudno.de](http://attendance.cloudno.de) 
